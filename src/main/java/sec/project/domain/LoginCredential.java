@@ -24,6 +24,11 @@ public class LoginCredential {
     private String url;
     private int user_id;
 
+    public LoginCredential(String url, String siteName) {
+        this.url = url;
+        this.siteName = siteName;
+    }
+
     public LoginCredential(String password, String username, String url, String siteName) {
         this.password = password;
         this.username = username;
@@ -43,7 +48,6 @@ public class LoginCredential {
     public static List<LoginCredential> getByUser(int id) throws SQLException {
         Connection c = DriverManager.getConnection("jdbc:sqlite:database");
         ArrayList<LoginCredential> list = new ArrayList();
-        System.out.println("SELECT lc.siteName, lc.url, lc.username, lc.password FROM User u JOIN LoginCredential lc ON lc.user_id = " + id);
         ResultSet r = c.createStatement().executeQuery("SELECT lc.siteName, lc.url, lc.username, lc.password FROM User u INNER JOIN LoginCredential lc ON lc.user_id = u.id WHERE u.id = " + id);
 
         while (r.next()) {
@@ -51,8 +55,6 @@ public class LoginCredential {
             String p = r.getString("password");
             String ur = r.getString("url");
             String sn = r.getString("siteName");
-            System.out.println(u + "\t" + p + "\t" + ur + "\t" + sn + "\t");
-
             LoginCredential lc = new LoginCredential(p, u, ur, sn);
             list.add(lc);
         }
@@ -60,29 +62,47 @@ public class LoginCredential {
         c.close();
         return list;
     }
-        public static List<LoginCredential> getBySite(int id, String sName) throws SQLException {
+
+    public static List<LoginCredential> getAll() throws SQLException {
         Connection c = DriverManager.getConnection("jdbc:sqlite:database");
         ArrayList<LoginCredential> list = new ArrayList();
-        System.out.println("SELECT lc.siteName, lc.url, lc.username, lc.password "
+        ResultSet r = c.createStatement().executeQuery("SELECT DISTINCT siteName, url FROM LoginCredential");
+
+        while (r.next()) {
+
+            String ur = r.getString("url");
+            String sn = r.getString("siteName");
+            LoginCredential lc = new LoginCredential(ur, sn);
+            list.add(lc);
+        }
+
+        c.close();
+        return list;
+    }
+
+    public static List<LoginCredential> getBySite(int id, String sName) throws SQLException {
+        Connection c = DriverManager.getConnection("jdbc:sqlite:database");
+        ArrayList<LoginCredential> list = new ArrayList();
+
+        System.out.println("\n\tSELECT lc.siteName, lc.url, lc.username, lc.password "
                 + "FROM User u"
                 + " INNER JOIN LoginCredential lc"
-                + " ON lc.user_id = u.id" 
-                + " WHERE u.id = " + id 
-                + " AND lc.siteName LIKE %" + sName  + "%");
+                + " ON lc.user_id = u.id"
+                + " WHERE u.id = " + id
+                + " AND lc.siteName LIKE '%" + sName + "%'");
+
         ResultSet r = c.createStatement().executeQuery("SELECT lc.siteName, lc.url, lc.username, lc.password "
                 + "FROM User u"
                 + " INNER JOIN LoginCredential lc"
-                + " ON lc.user_id = u.id" 
-                + " WHERE u.id = " + id 
-                + " AND lc.siteName LIKE '%" + sName  + "%'");
+                + " ON lc.user_id = u.id"
+                + " WHERE u.id = " + id
+                + " AND lc.siteName LIKE '%" + sName + "%'");
 
         while (r.next()) {
             String u = r.getString("username");
             String p = r.getString("password");
             String ur = r.getString("url");
             String sn = r.getString("siteName");
-            System.out.println(u + "\t" + p + "\t" + ur + "\t" + sn + "\t");
-
             LoginCredential lc = new LoginCredential(p, u, ur, sn);
             list.add(lc);
         }
@@ -90,7 +110,6 @@ public class LoginCredential {
         c.close();
         return list;
     }
-    
 
     public void save() throws SQLException {
         Connection c = DriverManager.getConnection("jdbc:sqlite:database");
@@ -98,8 +117,7 @@ public class LoginCredential {
         username = "'" + username + "'";
         siteName = "'" + siteName + "'";
         url = "'" + url + "'";
-        System.out.println("INSERT INTO LoginCredential(user_id ,username, password, siteName, url) "
-                + "VALUES (" + this.user_id + ", " + this.username + ", " + this.password + ", " + this.siteName + ", " + this.url + ")");
+
         c.createStatement().execute("INSERT INTO LoginCredential(user_id ,username, password, siteName, url) "
                 + "VALUES (" + this.user_id + ", " + this.username + ", " + this.password + ", " + this.siteName + ", " + this.url + ")");
         c.close();
@@ -124,6 +142,5 @@ public class LoginCredential {
     public String getUsername() {
         return username;
     }
-    
 
 }

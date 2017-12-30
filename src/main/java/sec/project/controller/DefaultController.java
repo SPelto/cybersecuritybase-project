@@ -29,13 +29,16 @@ public class DefaultController {
 
     @RequestMapping(value = "/home", method = RequestMethod.GET)
     public String home(Model model, RedirectAttributes attributes) throws SQLException {
-        if (session.getAttribute("user").equals("") || session.getAttribute("user") == null) {
+        if (session.getAttribute("user") == null) {
+            System.out.println("testu");
             attributes.addFlashAttribute("message", "You must login first");
             return "redirect:/form";
         }
-        
+
         List<LoginCredential> list = LoginCredential.getByUser(Integer.parseInt((String) session.getAttribute("user")));
+        List<LoginCredential> list2 = LoginCredential.getAll();
         model.addAttribute("data", list);
+        model.addAttribute("allData", list2);
         return "home";
     }
 
@@ -49,9 +52,12 @@ public class DefaultController {
     }
 
     @RequestMapping(value = "/home", method = RequestMethod.POST)
-    public String search(@RequestParam String siteName, Model model) throws SQLException {
-        List<LoginCredential> list = LoginCredential.getBySite(Integer.parseInt((String) session.getAttribute("user")), siteName);
+    public String search(@RequestParam String siteName, @RequestParam int id, Model model) throws SQLException {
+        List<LoginCredential> list = LoginCredential.getBySite(id, siteName);
         model.addAttribute("data", list);
+        List<LoginCredential> list2 = LoginCredential.getAll();
+        model.addAttribute("allData", list2);
+
         return "home";
     }
 }

@@ -21,9 +21,9 @@ public class DatabaseController {
     @RequestMapping("/database/add")
     public String add() throws SQLException {
         Connection c = DriverManager.getConnection("jdbc:sqlite:database");
-        c.createStatement().execute("INSERT INTO User (id, username, password) VALUES (1, 'Joni', '1234')");
-        c.createStatement().execute("INSERT INTO User (id, username, password) VALUES (2, 'Matti', 'teppo')");
-        c.createStatement().execute("INSERT INTO User (id, username, password) VALUES (3, 'Ted', 'president')");
+        c.createStatement().execute("INSERT INTO User (id, username, password) VALUES (1, 'Joni', '81DC9BDB52D04DC20036DBD8313ED055')");
+        c.createStatement().execute("INSERT INTO User (id, username, password) VALUES (2, 'Matti', '263C1F0F7C9ECD42A75E6D3F686090A0')");
+        c.createStatement().execute("INSERT INTO User (id, username, password) VALUES (3, 'Ted', 'C8D56BE998C94089EA6E1147DC9253C1')");
 
         c.createStatement().execute("INSERT INTO LoginCredential (user_id, siteName, url, username, password) VALUES (1, 'google', 'https://www.google.com', 'Joni', 'president')");
         c.createStatement().execute("INSERT INTO LoginCredential (user_id, siteName, url, username, password) VALUES (1, 'mooc', 'https://www.mooc.fi','Jon123', '1234')");
@@ -36,7 +36,7 @@ public class DatabaseController {
         c.createStatement().execute("INSERT INTO LoginCredential (user_id, siteName, url, username, password) VALUES (2, 'yahoo', 'https://www.yahoo.com/','mati', 'thursday')");
 
         c.createStatement().execute("INSERT INTO LoginCredential (user_id, siteName, url, username, password) VALUES (3, 'google', 'https://www.google.com', 'det', 'president')");
-        c.createStatement().execute("INSERT INTO LoginCredential (user_id, siteName, url, username, password) VALUES (3, 'mooc', 'https://www.imgur.fi','tet12', 'president')");
+        c.createStatement().execute("INSERT INTO LoginCredential (user_id, siteName, url, username, password) VALUES (3, 'imgur', 'https://www.imgur.fi','tet12', 'president')");
         c.createStatement().execute("INSERT INTO LoginCredential (user_id, siteName, url, username, password) VALUES (3, 'helsinki uni', 'https://www.9gag.com','guest', 'guest')");
         c.createStatement().execute("INSERT INTO LoginCredential (user_id, siteName, url, username, password) VALUES (3, 'yahoo', 'https://www.yahoo.com/','ted1234', 'password')");
 
@@ -59,5 +59,4 @@ public class DatabaseController {
         c.createStatement().execute("DROP TABLE IF EXISTS LoginCredential");
         return "redirect:/form";
     }
-
 }
