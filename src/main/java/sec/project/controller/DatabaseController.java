@@ -59,4 +59,12 @@ public class DatabaseController {
         c.createStatement().execute("DROP TABLE IF EXISTS LoginCredential");
         return "redirect:/form";
     }
+
+    @RequestMapping("/database/format")
+    public String format() throws SQLException {
+        delete();
+        set();
+        add();
+        return "redirect:/form";
+    }
 }

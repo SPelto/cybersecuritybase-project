@@ -1,0 +1,82 @@
+The application for this project can be found at "https://github.com/SPelto/cybersecuritybase-project". Once downloaded it can be opened with tmcbeans/netbeans, I trust that everyone here knows how to use tmcbeans since it has been used on the previous part of this course. Run the project, open your browser and type "localhost:8080" The database that comes with the project can be reset to default by "localhost:8080/database/format" it deletes all the tables of the database, creates them again and adds some test data. 
+	
+	The application I made for this project is a keychain tool for users to save and access their login credentials from various sites and to show them all the sites that other users are using AKA "popular sites". The program is abyssmal for it is a patchwork that has many parts that are not even used, it uses manual SQL and so there most definetly are myriad of vulnerabilities, I'll be covering five of them: A1 - injection,  A4 - Direct Object Reference, A3 - XSS, A6 - sensitive data exposure, A8 - CSRF. 
+
+	A1 - Injection. This application uses JDBC and sqlite version 3.20.0. All the queries made to the database are manually written and none of the strings are escaped and no prepared statements are used. This makes the application fully vulnerable for SQL-injections. One of those vulnerabilities can be used view other users data. 
+Issue: SQL Injection
+Steps to reproduce:
+1. Start the application and your browser. Type "localhost:8080".
+2. Login (you can create new user or use pre-existing one "username = Ted , password = president).
+3. Locate "Search your keychain by site" from the upper right part of the webpage.
+4. In the field "Name of the site" type [  asd%' OR '1%'='1  ] without the brackets and click "search".
+5. You should now see data from other users.
+
+This issue could be fixed by using SPRING-frameworks ORMs instead of writing the quories manually. Alternatively it could be fixed by using preferedstatements or sanitazing manually all sql-quories.
+
+	A3 - XSS. This application doesn't sanitize text in the "popular sites table"
+Issue: XSS
+Steps to reproduce:
+1. Start the application and your browser. Type "localhost:8080".
+2. Login (you can create new user or use pre-existing one "username = Ted , password = president).
+3. Locate the "Add credentials to your keychain" from the upper left part of the webpage.
+4. Write in the textfield from top to bottom the following (seperated by comma): <script>alert("this site is vulnerable");</script>, https://www.notarealsite.com, newuser, newpassword
+5. Click add.
+6. You should see a popup saying: "this site is vulnerable"
+
+The only meaningfull text was the one in the "name of the site" field. It is shown to every user so everyone will be affected by the XSS. The script we used was rather bening 'alert' but malignant attacker could be far more inventive. This could be resolved by treating every bit of data that comes from the users as dangerous and sanitizing it all. In this particular application this spesific instance can be removed simply by editing the "popular sites" table html code and changing "th:utext="${d.getSiteName()}" to "th:text="${d.getSiteName()}".
+
+	A4 - Direct Object Reference. There is a direct reference to the users session attribute in the html-code.
+Issue: Direct Object Reference
+Steps to reproduce:
+1. Start the application and your browser. Type "localhost:8080".
+2. Login (you can create new user or use pre-existing one "username = Ted , password = president).
+3. Locate the "Search your keychain by site" at the upper right part of the page.
+4. Right click it, then from the opening menu choose "inspect". This opens the html of that part of the page.
+5. One of the '<input>' tags should have a "<input name="id" hidden="true" value="some_number">"
+6. Change the "some-number" (the number that is shown depends on the user who is logged in) to 1,2 or 3
+7. Leave the field "Name of the site" empty and click (by leaving it empty we are not filtering the data) "Search" this should send the form with the modified id and return the corresponding data.
+8. You should now see the data of the corresponding user whos id you changed to the form.
+
+The fix for this would be to have sessionid as part of the <form>, instead it should be only accessed ath the server side.
+
+	A6 - Sensitive Data Exposure.
+This application has few problems in this regard. It uses old hashing algorithm MD5 for storing users passwords. MD5 is problematic mostly because of it's age and because of it there are databases on the internet that can check if there exists matching hash. One such site is "https://hashkiller.co.uk/md5-decrypter.aspx" you can try it with one of our users "Matti"'s hashed password "263C1F0F7C9ECD42A75E6D3F686090A0". This could be resolved by using newer hash-algorithm. 
+
+	A8 - CSRF
+Issue: Cross Site Request Forgery
+For this you'll need another server to send the request. I'm using python django server.
+
+Steps to reproduce:
+1. Create html that has the following form in it: 
+"<form action="http://localhost:8080/change" method="POST">
+        <input name="username" type="hidden" value="attacker"/>
+        <input name="password" type="hidden" value="attacker"/>
+        <input type="submit" value="You are our 1000000st customer!!!!! click to get your price!">
+ </form>"
+2. Enter the site you made when still logged in in my keychain application.
+3. Click the button on your site.
+4. Whoever was logged in keychain application just had his username and password changed to attacker:attacker.
+
+This could be fixed by using csrf tokens. In my application they are disabled with a "http.csrf().disable();" in SecurityConfiguration.java at line 24. Removing that line of code should prevent this type of simplistic attack.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
